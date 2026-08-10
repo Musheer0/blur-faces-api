@@ -1,0 +1,37 @@
+# Virtual environment
+.venv/
+venv/
+
+# Environment variables
+.env
+.env.*
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# uv / Python cache
+.uv/
+CACHEDIR.TAG
+
+# Temporary files
+tmp/
+
+# Build / distribution
+dist/
+build/
+*.egg-info/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+
+/bin/
+/lib/
+/lib64/
+/include/
+.env
+tmp/
+CACHEDIR.TAG
+pyvenv.cfg
