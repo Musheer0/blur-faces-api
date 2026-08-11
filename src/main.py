@@ -20,7 +20,7 @@ secrets = modal.Secret.from_name("face-blur")
 @app.function(image=image,secrets=[secrets])
 @modal.asgi_app()
 def api():
-    from fastapi import FastAPI,Request,Depends
+    from fastapi import FastAPI,Request,Depends,HTTPException
     from app.modals  import BlurVideoResponse,BlurVideoRequest,BlurVideoRequestSelective
     from app.blur_video import blur_video,blur_video_by_target
     from app.api_middleware import apiMiddleware
@@ -51,7 +51,7 @@ def api():
             return {"success":True, "key":body.output_key}
         except Exception as e :
             print(e)
-            return {"success":False}
+            raise HTTPException(status_code=400, detail="Error processing video try again")
     @web_app.post("/api/blur-video/selective",dependencies=[Depends(apiMiddleware)])
     def  blur_video_api(body:BlurVideoRequestSelective):
         from app.s3 import download_video,upload_video
@@ -75,5 +75,5 @@ def api():
             return {"success":True, "key":body.output_key}
         except Exception as e :
             print(e)
-            return {"success":False}
+            raise HTTPException(status_code=400, detail="Error processing video try again")
     return web_app
