@@ -60,7 +60,9 @@ def api():
             file_path = download_video(body.key)
             target_file_path = download_video(body.target_image)
             output = blur_video_by_target(method=body.blur_method, output=body.output_key, input=file_path, target_img=target_file_path)
-            r_video_path = lambda p : output.split(".")[0]+"_recovered"+output.split(".")[1]
+            r_video_path = lambda p: (
+    os.path.splitext(p)[0] + "_recovered" + os.path.splitext(p)[1]
+)
             recovered_video = recover_audio(input=output, output=r_video_path(output),audio_video=file_path)
             upload_video(body.output_key, recovered_video)
             try:
