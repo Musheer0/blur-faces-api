@@ -21,8 +21,8 @@ secrets = modal.Secret.from_name("face-blur")
 @modal.asgi_app()
 def api():
     from fastapi import FastAPI,Request,Depends
-    from app.modals  import BlurVideoResponse,BlurVideoRequest
-    from app.blur_video import blur_video
+    from app.modals  import BlurVideoResponse,BlurVideoRequest,BlurVideoRequestSelective
+    from app.blur_video import blur_video,blur_video_by_target
     from app.api_middleware import apiMiddleware
     web_app = FastAPI()
     @web_app.middleware("http")
@@ -48,6 +48,28 @@ def api():
             print(file_path)
             output = blur_video(method=body.blur_method, output=body.output_key, input=file_path)
             upload_video(body.output_key, output)
+            return {"success":True, "key":body.output_key}
+        except Exception as e :
+            print(e)
+            return {"success":False}
+    @web_app.post("/api/blur-video/selective",dependencies=[Depends(apiMiddleware)])
+    def  blur_video_api(body:BlurVideoRequestSelective):
+        from app.s3 import download_video,upload_video
+        from .app.recover_audio import recover_audio
+        try:
+            file_path = download_video(body.key)
+            target_file_path = download_video(body.target_image)
+            output = blur_video_by_target(method=body.blur_method, output=body.output_key, input=file_path, target_img=target_file_path)
+            r_video_path = lambda p : output.split(".")[0]+"_recovered"+output.split(".")[1]
+            recovered_video = recover_audio(input=output, output=r_video_path(output),audio_video=file_path)
+            upload_video(body.output_key, recovered_video)
+            try:
+                os.remove(file_path)
+                os.remove(target_file_path)
+                os.remove(recovered_video)
+                os.remove(output)
+            except:
+                print("Error deleting file")
             return {"success":True, "key":body.output_key}
         except Exception as e :
             print(e)

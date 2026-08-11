@@ -5,6 +5,11 @@ class BlurVideoRequest(BaseModel):
     key:str
     output_key:str
     blur_method:BlurMethod
+class BlurVideoRequestSelective(BaseModel):
+    key:str
+    output_key:str
+    blur_method:BlurMethod
+    target_image:str
     
 class BlurVideoResponse(BaseModel):
     success:bool
