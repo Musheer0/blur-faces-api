@@ -55,7 +55,7 @@ def api():
     @web_app.post("/api/blur-video/selective",dependencies=[Depends(apiMiddleware)])
     def  blur_video_api(body:BlurVideoRequestSelective):
         from app.s3 import download_video,upload_video
-        from .app.recover_audio import recover_audio
+        from app.recover_audio import recover_audio
         try:
             file_path = download_video(body.key)
             target_file_path = download_video(body.target_image)
