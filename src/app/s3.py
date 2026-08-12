@@ -4,7 +4,9 @@ s3 = boto3.client("s3")
 bucket_name = os.environ.get("S3_BUCKET")
 def download_video(key)->str:
     file_path = "/tmp/videos/"+key
-    os.makedirs("/tmp/videos", exist_ok=True)
+    print("downloadedr", file_path)
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)
+
     s3.download_file(
         bucket_name,
         key,
@@ -13,7 +15,7 @@ def download_video(key)->str:
     return file_path
 def download_img(key)->str:
     file_path = "/tmp/images/"+key
-    os.makedirs("/tmp/images", exist_ok=True)
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)
     s3.download_file(
         bucket_name,
         key,

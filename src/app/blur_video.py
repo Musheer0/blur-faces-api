@@ -7,7 +7,6 @@ from .get_embiddings import get_embedding
 from .filter_faces import filter_faces_by_frame
 import os
 def blur_video(method:BlurMethod, input: str, output:str):
-
     blurrer = getBlurrer(method)
     cap = cv2.VideoCapture(input)
     print("input:", input)
@@ -19,7 +18,7 @@ def blur_video(method:BlurMethod, input: str, output:str):
     w =int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     output_path = '/tmp/videos/output/'+output
-    os.makedirs("/tmp/videos/output", exist_ok=True)
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
     output_video = FFmpegWriter(
         output_path,
         w,
@@ -40,7 +39,6 @@ def blur_video(method:BlurMethod, input: str, output:str):
     output_video.release() 
     return output_path
 def blur_video_by_target(method:BlurMethod, input: str, output:str, target_img:str):
-
     blurrer = getBlurrer(method)
     target_face,t_image = detect_face(target_image=target_img)
     target_embedding = get_embedding(target_face=target_face, target_image=t_image)
@@ -52,10 +50,11 @@ def blur_video_by_target(method:BlurMethod, input: str, output:str, target_img:s
     print("width:", cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     print("height:", cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     fps = cap.get(cv2.CAP_PROP_FPS)
+
     w =int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     output_path = '/tmp/videos/output/'+output
-    os.makedirs("/tmp/videos/output", exist_ok=True)
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
     output_video = FFmpegWriter(
         output_path,
         w,

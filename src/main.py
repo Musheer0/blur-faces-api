@@ -25,21 +25,7 @@ def api():
     from app.blur_video import blur_video,blur_video_by_target
     from app.api_middleware import apiMiddleware
     web_app = FastAPI()
-    @web_app.middleware("http")
-    async def log_requests(request: Request, call_next):
-        print(f"{request.method} {request.url}")
 
-        response = await call_next(request)
-
-        print(f"Status: {response.status_code}")
-
-        return response
-    @web_app.get("/")
-    def home():
-        return {
-            "message":"hello world"
-        }
-        
     @web_app.post("/api/blur-video",dependencies=[Depends(apiMiddleware)])
     def  blur_video_api(body:BlurVideoRequest):
         from app.s3 import download_video,upload_video
@@ -56,6 +42,7 @@ def api():
     def  blur_video_api(body:BlurVideoRequestSelective):
         from app.s3 import download_video,upload_video
         from app.recover_audio import recover_audio
+        print(body)
         try:
             file_path = download_video(body.key)
             target_file_path = download_video(body.target_image)
