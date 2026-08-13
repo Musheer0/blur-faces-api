@@ -1,8 +1,13 @@
-import modal
+import logging
 import os
+
+import modal
 
 os.makedirs("/tmp/videos", exist_ok=True)
 os.makedirs("/tmp/videos/output", exist_ok=True)
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = modal.App("face-blur-v1")
 image = (
@@ -17,50 +22,20 @@ image = (
 secrets = modal.Secret.from_name("face-blur")
 
 
-@app.function(image=image,secrets=[secrets])
+@app.function(image=image, secrets=[secrets])
 @modal.asgi_app()
 def api():
-    from fastapi import FastAPI,Request,Depends,HTTPException
-    from app.modals  import BlurVideoResponse,BlurVideoRequest,BlurVideoRequestSelective
-    from app.blur_video import blur_video,blur_video_by_target
-    from app.api_middleware import apiMiddleware
-    web_app = FastAPI()
+    from fastapi import FastAPI
 
-    @web_app.post("/api/blur-video",dependencies=[Depends(apiMiddleware)])
-    def  blur_video_api(body:BlurVideoRequest):
-        from app.s3 import download_video,upload_video
-        try:
-            file_path = download_video(body.key)
-            print(file_path)
-            output = blur_video(method=body.blur_method, output=body.output_key, input=file_path)
-            upload_video(body.output_key, output)
-            return {"success":True, "key":body.output_key}
-        except Exception as e :
-            print(e)
-            raise HTTPException(status_code=400, detail="Error processing video try again")
-    @web_app.post("/api/blur-video/selective",dependencies=[Depends(apiMiddleware)])
-    def  blur_video_api(body:BlurVideoRequestSelective):
-        from app.s3 import download_video,upload_video
-        from app.recover_audio import recover_audio
-        print(body)
-        try:
-            file_path = download_video(body.key)
-            target_file_path = download_video(body.target_image)
-            output = blur_video_by_target(method=body.blur_method, output=body.output_key, input=file_path, target_img=target_file_path)
-            r_video_path = lambda p: (
-    os.path.splitext(p)[0] + "_recovered" + os.path.splitext(p)[1]
-)
-            recovered_video = recover_audio(input=output, output=r_video_path(output),audio_video=file_path)
-            upload_video(body.output_key, recovered_video)
-            try:
-                os.remove(file_path)
-                os.remove(target_file_path)
-                os.remove(recovered_video)
-                os.remove(output)
-            except:
-                print("Error deleting file")
-            return {"success":True, "key":body.output_key}
-        except Exception as e :
-            print(e)
-            raise HTTPException(status_code=400, detail="Error processing video try again")
+    from app.routes.photo_routes import router as photo_router
+    from app.routes.video_routes import router as video_router
+
+    web_app = FastAPI()
+    web_app.include_router(video_router)
+    web_app.include_router(photo_router)
+
+    @web_app.get("/health")
+    def health():
+        return {"status": "ok"}
+
     return web_app

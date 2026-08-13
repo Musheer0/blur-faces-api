@@ -29,4 +29,13 @@ def upload_video(key,file)->str:
         key
     )
     return key
+def download_image(key)->str:
+    return download_img(key)
+def upload_image(key,file)->str:
+    s3.upload_file(
+        file,
+        bucket_name,
+        key
+    )
+    return key
     
