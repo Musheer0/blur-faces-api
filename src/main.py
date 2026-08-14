@@ -37,5 +37,9 @@ def api():
     @web_app.get("/health")
     def health():
         return {"status": "ok"}
+    
+    @web_app.head("/health")
+    def health_head():
+        return {"status": "ok"}
 
     return web_app
